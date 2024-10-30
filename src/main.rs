@@ -1,6 +1,8 @@
 use std::io;
 use std::io::Read;
 
+const MEMORY_CELLS: i32 = 30000;
+
 fn find_closing(idx: usize, chars: &Vec<char>) -> usize {
     let mut open_brackets = 0;
     for i in idx..chars.len() {
@@ -40,7 +42,7 @@ fn main() {
     let chars = input.chars().collect::<Vec<char>>();
 
     let mut memory_position = 0;
-    let mut memory: Vec<u32> = vec![0; 1000];
+    let mut memory: Vec<i32> = vec![0; MEMORY_CELLS as usize];
 
     let mut i = 0;
     while i < chars.len() {
@@ -52,9 +54,15 @@ fn main() {
                 memory[memory_position] -= 1;
             },
             '>' => {
+                if memory_position + 1 == MEMORY_CELLS as usize {
+                    memory_position = 0;
+                }
                 memory_position += 1;
             },
             '<' => {
+                if memory_position == 0 {
+                    memory_position = MEMORY_CELLS as usize - 1;
+                }
                 memory_position -= 1;
             },
             '[' => {
@@ -70,14 +78,14 @@ fn main() {
                 }
             },
             '.' => {
-                print!("{}", char::from_u32(memory[memory_position].into()).unwrap());
+                print!("{}", char::from_u32(memory[memory_position].try_into().expect("cringe")).unwrap());
             },
             ',' => {
                 let input = io::stdin()
                     .bytes()
                     .next()
                     .and_then(|result| result.ok())
-                    .map(|byte| byte as u32)
+                    .map(|byte| byte as i32)
                     .unwrap();
 
                 memory[memory_position] = input;
